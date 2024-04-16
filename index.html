@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+<script>
+    const loadCSV = (url) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = (e) => {
+            const text = e.target.responseText;
+
+            let twoDArray = text.split("\n").map(row => row.split(","));
+
+            //loop through the code to remove any /r from the end of the string
+            for (let i = 0; i < twoDArray.length; i++) {
+                for (let j = 0; j < twoDArray[i].length; j++) {
+                    twoDArray[i][j] = twoDArray[i][j].replace(/\r/g, "");
+                }
+            }
+
+            console.log(twoDArray);
+        };
+        xhr.open("GET",url);
+        xhr.send();
+    }
+
+    loadCSV("data/ReadTestData.csv");
+
+</script>
+</html>
