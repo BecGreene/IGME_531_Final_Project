@@ -7,12 +7,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha512-jduERlz7En1IUZR54bqzpNI64AbffZWR//KJgF71SJ8D8/liKFZ+s1RxmUmB+bhCnIfzebdZsULwOrbVB5f3nQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
-    <input type="file" id="csv-upload-button"/>
+    <input type="file" id="fileinput"/>
 </body>
 <script>
 
-    const uploadButton = document.querySelector('#csv-upload-button');
-    console.log(uploadButton);
+    const fileInput = document.getElementById("fileinput");
 
     const loadCSV = (url) => {
         const xhr = new XMLHttpRequest();
@@ -47,6 +46,33 @@
         });
         osc.stop(`+${frs.length}`);
     }
+
+    function readSingleFile(evt) {
+        var f = evt.target.files[0]; 
+        if (f) {
+        var r = new FileReader();
+        r.onload = function(e) { 
+            var contents = e.target.result;
+            //document.write("File Uploaded! <br />" + "name: " + f.name + "<br />" + "content: " + contents + "<br />" + "type: " + f.type + "<br />" + "size: " + f.size + " bytes <br />");
+            console.log("File Uploaded!" + " name: " + f.name + " content: " + contents + " type: " + f.type + " size: " + f.size + " bytes");
+
+            var lines = contents.split("\n"), output = [];
+            for (var i=0; i<lines.length; i++){
+                output.push("<tr><td>" + lines[i].split(",").join("</td><td>") + "</td></tr>");
+            }
+            output = "<table>" + output.join("") + "</table>";
+            //document.write(output);
+            //console.log(output);
+        }
+        r.readAsText(f);
+        //document.write(output);
+        console.log(output);
+        } else { 
+        alert("Failed to load file");
+        }
+  }
+
+    fileInput.addEventListener("change", readSingleFile);
 
     loadCSV("data/ReadTestData.csv");
 
