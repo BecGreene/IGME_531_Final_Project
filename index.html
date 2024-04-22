@@ -6,9 +6,13 @@
     <title>Document</title>
 </head>
 <body>
-    
+    <input type="file" id="csv-upload-button"/>
 </body>
 <script>
+
+    const uploadButton = document.querySelector('#csv-upload-button');
+    console.log(uploadButton);
+
     const loadCSV = (url) => {
         const xhr = new XMLHttpRequest();
         xhr.onload = (e) => {
