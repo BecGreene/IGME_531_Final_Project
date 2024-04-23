@@ -87,6 +87,15 @@
         else { alert("Failed to load file"); }
   }
 
+  function createRange(values) {
+    let low = 100;
+    let high = 500;
+
+    let max = Math.max(...values);
+
+    return values.map((x) => ((x / max) * (high - low)) + low);
+  }
+
     fileInput.addEventListener("change", readSingleFile);
 
     //loadCSV("data/ReadTestData.csv");
