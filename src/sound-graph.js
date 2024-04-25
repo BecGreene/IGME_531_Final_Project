@@ -33,7 +33,7 @@ const getData = (d) => {
 }
 
 const createRangeAndUnits = () => {
-    let mnmx = getMaxMin(data)
+    let mnmx = getMaxMin(data);
     minVal = mnmx[0];
     maxVal = mnmx[1];
     let xCount = data.length;
