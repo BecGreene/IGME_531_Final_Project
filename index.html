@@ -74,11 +74,10 @@
         osc.frequency.value = frs[0];
 
         osc.start();
-        frs.splice(0, 1);
 
-        frs.forEach(element => {
-            osc.frequency.rampTo(element, 1);
-        });
+        for(let i = 0; i < frs.length; i++) {
+            osc.frequency.rampTo(frs[i], 1, `+${i}.0`);
+        }
         osc.stop(`+${frs.length}`);
     }
 
@@ -94,11 +93,16 @@
         for (let f = 0; f < frqArray.length; f++) {
             console.log(f); 
             let element = frqArray[f];
-            createSoundwave(f);
+            
 
-            setTimeout(() => {
-                osc.frequency.rampTo(element, 1);
-            }, "1000");
+            //setTimeout(() => {
+            //    osc.frequency.rampTo(element, 1);
+            //}, "1000");
+            for(let i = 0; i < frs.length; i++) {
+                osc.frequency.rampTo(frs[i], 1, `+${i}.0`);
+                createSoundwave(i);
+            }
+            osc.stop(`+${frs.length}`);
         }
 
         osc.stop(`+${frqArray.length}`);
