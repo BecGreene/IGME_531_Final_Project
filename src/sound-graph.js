@@ -1,3 +1,8 @@
+///
+/// NOTICE: this file is not used by index.js. 
+/// Once it was moved into this folder all of the necessary code was migrated to the <script> element of index.js
+///
+
 let canvas;
 let ctx;
 
