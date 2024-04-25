@@ -3,22 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV File Reader</title>
+    <title>Data to Music</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha512-jduERlz7En1IUZR54bqzpNI64AbffZWR//KJgF71SJ8D8/liKFZ+s1RxmUmB+bhCnIfzebdZsULwOrbVB5f3nQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
-    <input type="file" id="fileinput"/>
+    <!--input type="file" id="fileinput"/-->
     <div class="container">
-        <h1>CSV File Reader</h1>
+        <h1>Data to Music</h1>
         <input type="file" id="fileinput" accept=".csv"/>
+        <div id="controls">
+            <label for="row">Row to Musicify:</label>
+            <input type="number" id="rowSelect" name="row" placeholder="1" min="1" max="10"/>
+            <button id="playButton">Play</button>
+        </div>
         <div id="table-container"></div>
+
+        <canvas id="soundGraph" width="600" height="300"></canvas>
     </div>
 </body>
 <script>
-
     const fileInput = document.getElementById("fileinput");
     let fileArray = [];
+
+    const rowInput = document.getElementById("rowSelect");
+
+    let row = 1;
+
+    const playButton = document.getElementById("playButton");
+
+    // canvas graph variables
+    const canvas = document.getElementById('soundGraph');
+    const ctx = canvas.getContext("2d");
+
+    const yMargin = 20;
+
+    let graphMinVal = 0;
+    let graphMaxVal = 300;
+
+    let graphYRange;
+    let graphXUnit;
+
+    let data;
+    let graphData;
+    let frqArray;
 
     const loadCSV = (url) => {
         const xhr = new XMLHttpRequest();
@@ -54,6 +82,28 @@
         osc.stop(`+${frs.length}`);
     }
 
+    // this was supposed to highlight the graph along with the sound being played but i couldn't get it to work
+    const playSoundswithGraph = () => {
+        const osc = new Tone.Oscillator().toDestination();
+
+        osc.frequency.value = frqArray[0];
+
+        osc.start();
+        frqArray.splice(0, 1);
+
+        for (let f = 0; f < frqArray.length; f++) {
+            console.log(f); 
+            let element = frqArray[f];
+            createSoundwave(f);
+
+            setTimeout(() => {
+                osc.frequency.rampTo(element, 1);
+            }, "1000");
+        }
+
+        osc.stop(`+${frqArray.length}`);
+    }
+
     function readSingleFile(evt) {
 
         let f = evt.target.files[0];
@@ -79,24 +129,83 @@
                 }
 
                 console.log(fileArray);
+
+                // create graphic visualization of sound
+                data = fileArray;
+                rowInput.setAttribute("max") = fileArray.length;
             }
 
             r.readAsText(f);
 
         } 
         else { alert("Failed to load file"); }
-  }
+    }
 
-  function createRange(values) {
-    let low = 100;
-    let high = 500;
+    const createSoundwave = (active) => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "skyblue";
+        for (let i = 0; i < graphData.length; i++) {
+            ctx.save();
+            if (active === i) { ctx.fillStyle = "lime" };
+            const barHeight = (graphData[i] / (graphMaxVal + yMargin)) * canvas.height;
+            const flippedY = canvas.height - barHeight;
+            ctx.fillRect(i * graphXUnit, flippedY, graphXUnit, barHeight);
+            ctx.restore();
+        }
+    }
 
-    let max = Math.max(...values);
+    const createGraphRangeAndUnits = () => {
+        let mnmx = getMaxMin(graphData);
+        graphMinVal = mnmx[0];
+        graphMaxVal = mnmx[1];
+        let xCount = graphData.length;
+        graphYRange = graphMaxVal-graphMinVal;
+        graphXUnit = canvas.width / xCount;
+    }                                                   
 
-    return values.map((x) => ((x / max) * (high - low)) + low);
-  }
+    const getMaxMin = (data) => {
+    let minMax = [data[0],data[0]];
+    for (let i = 1; i < data.length; i++) {
+        if (data[i] < minMax[0]) {
+            minMax[0] = data[i];
+        }
+        else if (data[i] > minMax[1]) {
+            minMax[1] = data[i];
+        }
+    }
+    return minMax;
+}
+
+    function createRange(values) {
+        let low = 100;
+        let high = 500;
+
+        let max = Math.max(...values);
+
+        return values.map((x) => ((x / max) * (high - low)) + low);
+    }
+
+    const musicify = () => {
+        graphData = data[row-1].map(Number);
+
+        console.log('Graph Data: ' + graphData);
+        createGraphRangeAndUnits();
+        console.log(`Graph Parameters: \nmin:${graphMinVal}, max:${graphMaxVal}, yRange:${graphYRange}, xUnit:${graphXUnit}`);
+
+        // play sounds
+        frqArray = createRange(graphData);
+        console.log('Frequecy Data: ' + frqArray);
+
+        //playSoundswithGraph();
+        playSounds(frqArray);
+        createSoundwave(graphData);
+    }
 
     fileInput.addEventListener("change", readSingleFile);
+
+    rowInput.addEventListener("change", () => { row = rowInput.value; });
+
+    playButton.addEventListener("click", musicify);
 
     //loadCSV("data/ReadTestData.csv");
 
